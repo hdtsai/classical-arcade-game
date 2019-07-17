@@ -1,57 +1,51 @@
 // current round
 let round = 1;
-//enemy class
-class Enemy{
-    constructor(){
-        this.sprite = 'images/enemy-bug.png';
-        this.x = 0;
-        this.y = Math.floor(Math.random() * 200) + 50;
-        this.speed =  Math.floor(Math.random() * 250) + 80;
+// prototype of both Enemy and Player
+class Character{
+    constructor(sprite, x, y, speed){
+        this.sprite = sprite;
+        this.x = x;
+        this.y = y;
+        this.speed = speed;
     }
-    update(dt){
-        // add with time * speed
-        this.x +=  dt * this.speed;
-        //first round we create 5 enemies, it would increase.
-        if (allEnemies.length >= 5){
-            clearInterval(startCreating);
-        }
-        // if bug is moving out of bound, its location would be reset.
-        if(this.x > 500){
-            this.x = 0;
-            this.y = Math.floor(Math.random() * 200) + 50;
-            this.speed = Math.floor(Math.random() * 250) + 80;
-        }
-        // collision detection
-        console.log(player.x, player.y,this.x, this.y);
-
-        if (Math.abs(this.x - player.x) <= 15 && Math.abs(this.y - player.y) <= 15){
-            player.x = 200;
-            player.y = 400;
-        }
-    }
+    update(){};
     render(){
         ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
     }
 }
+//enemy class
+class Enemy extends Character{
+    constructor(sprite, x, y, speed){
+        super(sprite, x, y, speed);
+    }
+    update(dt){
+        // add with time * speed
+        this.x +=  dt * this.speed;
+        // if bug is moving out of bound, its location would be reset.
+        if(this.x > 500){
+            this.x = -30;
+            this.y = Math.floor(Math.random() * 200) + 50;
+            this.speed = Math.floor(Math.random() * 250) + 80;
+        }
+        // collision detection
+        if (Math.abs(this.x - player.x) <= 40 && Math.abs(this.y - player.y) <= 40){
+            player.x = 200;
+            player.y = 400;
+        }
+    }
+}
 
 //player class
-class Player{
-    constructor(x= 200, y = 400){
-        this.sprite = 'images/char-boy.png';
-        this.x = x;
-        this.y = y;
-        this.movingSpeed = 25;
-    }
-    update(){}
-    render(){
-        ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
+class Player extends Character{
+    constructor(sprite, x, y, speed){
+        super(sprite, x, y, speed);
     }
     handleInput(num){
         //if the player reaches the goal, add the round number and add one enemy.
         if(this.y <= 20){
             this.x = 200;
             this.y = 400;
-            this.movingSpeed += 2;
+            this.speed += 2;
             round++;
             // show some sentences if reaching round 15
             if (round === 15){
@@ -63,45 +57,45 @@ class Player{
                 })
             }
             document.querySelector('#round').textContent = round.toString();
-            allEnemies.push(new Enemy());
+            allEnemies.push(new Enemy('images/enemy-bug.png', -30, Math.floor(Math.random() * 200) + 50, Math.floor(Math.random() * 250) + 80));
         }
         //moving with keyboard action.
         if(num === 'up' && this.y >= 20){
-            this.y -= this.movingSpeed;
+            this.y -= this.speed;
         }
         if(num === 'down' && this.y <= 400){
-            if(this.y + this.movingSpeed > 400){
+            if(this.y + this.speed > 400){
                 this.y = 400;
             }else {
-                this.y += this.movingSpeed;
+                this.y += this.speed;
             }
         }
         if(num === 'left' && this.x >= 0){
-            if(this.x - this.movingSpeed < 0){
+            if(this.x - this.speed < 0){
                 this.x = 0;
             }else{
-                this.x -= this.movingSpeed;
+                this.x -= this.speed;
             }
         }
         if(num === 'right' && this.x <= 400){
-            if(this.x + this.movingSpeed > 400){
+            if(this.x + this.speed > 400){
                 this.x = 400;
             }else{
-                this.x += this.movingSpeed;
+                this.x += this.speed;
             }
         }
     }
+
 }
 // Place all enemy objects in allEnemies
 let allEnemies = [];
 
 //initialize enemies
-let startCreating = setInterval(function(){
-    allEnemies.push(new Enemy());
-}, 1000);
-
+for(let i = 0 ; i < 5 ; i ++){
+    allEnemies.push(new Enemy('images/enemy-bug.png', -30, Math.floor(Math.random() * 200) + 50, Math.floor(Math.random() * 250) + 80));
+}
 // initialize player
-const player = new Player();
+const player = new Player('images/char-boy.png', 200, 400, 25);
 
 // This listens for key presses and sends the keys to Player.handleInput() method.
 document.addEventListener('keyup', function(e) {
